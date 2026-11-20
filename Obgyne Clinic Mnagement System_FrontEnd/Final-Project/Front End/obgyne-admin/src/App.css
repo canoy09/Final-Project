@@ -1,0 +1,23 @@
+/* Placeholder screen shown after login until the dashboard (next WBS items) is built. */
+.placeholder {
+  min-height: 100svh;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  text-align: center;
+  padding: 24px;
+  background: var(--cream);
+}
+.placeholder h1 { font-family: var(--serif); font-weight: 500; margin: 0; color: var(--sage-900); }
+.placeholder p { margin: 0; color: var(--muted); }
+.placeholder button {
+  justify-self: center;
+  margin-top: 8px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px solid var(--sage-600);
+  background: transparent;
+  color: var(--sage-700);
+  cursor: pointer;
+}
+.placeholder button:hover { background: var(--sage-100); }
