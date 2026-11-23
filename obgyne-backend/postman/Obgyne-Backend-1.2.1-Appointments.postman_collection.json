@@ -1,0 +1,114 @@
+{
+  "info": {
+    "name": "Obgyne Backend 1.2.1 - Appointments",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "token",
+      "value": "PASTE_TOKEN_FROM_LOGIN"
+    },
+    {
+      "key": "date",
+      "value": "2026-11-23"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. List appointments for date",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/appointments?date={{date}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('appointments array returned', () => pm.expect(pm.response.json().appointments).to.be.an('array')); "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Filter pending appointments",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/appointments?date={{date}}&status=pending"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('all rows are pending', () => pm.expect(pm.response.json().appointments.every(a => a.status === 'pending')).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. No token (expect 401)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/appointments?date={{date}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Invalid status (expect 400)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/appointments?status=invalid"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
