@@ -1,0 +1,22 @@
+:root {
+  font: 17px/1.45 system-ui, 'Segoe UI', Roboto, sans-serif;
+  color: #4a4a48;
+  background: #f1eee8;
+  color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input {
+  font-family: inherit;
+}
