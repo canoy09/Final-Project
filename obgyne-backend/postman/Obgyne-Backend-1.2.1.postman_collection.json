@@ -1,0 +1,115 @@
+{
+  "info": {
+    "name": "OB-GYN Clinic Backend 1.2.1 - Appointment Schedule",
+    "description": "Tests the authenticated appointment schedule endpoint. Login first and paste the JWT into the collection variable token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "token",
+      "value": "PASTE_LOGIN_TOKEN_HERE"
+    },
+    {
+      "key": "date",
+      "value": "2026-11-23"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Get appointments for a date (all statuses)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/appointments?date={{date}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "pm.test('Response contains appointments array', () => pm.expect(pm.response.json().appointments).to.be.an('array'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Filter appointments by status",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/appointments?date={{date}}&status=pending"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "pm.test('All returned appointments are pending', () => pm.expect(pm.response.json().appointments.every(a => a.status === 'pending')).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Missing token (expect 401)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/appointments?date={{date}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Unauthorized without token', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Invalid status (expect 400)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/appointments?date={{date}}&status=unknown"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Invalid status is rejected', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

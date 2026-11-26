@@ -1,0 +1,22 @@
+/* Nav tabs are links now (they used to be plain text), so tidy their look. */
+.bar-link {
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.bar-link:not(.active):hover {
+  background: rgba(91, 122, 102, 0.14);
+}
+.bar-link:focus-visible {
+  outline: 3px solid rgba(91, 122, 102, 0.5);
+  outline-offset: 2px;
+}
+
+/* Phones: Schedule.css hides the nav (it only had one page). Show it as its own row. */
+@media (max-width: 820px) {
+  .bar-nav {
+    display: flex;
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+}

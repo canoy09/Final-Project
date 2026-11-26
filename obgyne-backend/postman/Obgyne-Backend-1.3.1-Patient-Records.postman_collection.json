@@ -1,0 +1,397 @@
+{
+  "info": {
+    "name": "Obgyne 1.3.1 View Patient Health Records API",
+    "description": "Run requests 1-14 in order (Collection Runner works). Requires: login seeded with `npm run seed`, 1.3.1 SQL imported, and `npm run seed:patients`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Login - Doctor (saves token)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"identifier\": \"doctor@gmail.com\", \"password\": \"Doctor Clinic\", \"role\": \"doctor\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Run this first. It saves the token so the other requests work. Credentials come from scripts/seed.js."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('Returns a doctor token', () => { pm.expect(j.token).to.be.a('string'); pm.expect(j.user.role).to.eql('doctor'); });",
+              "pm.collectionVariables.set('doctorToken', j.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Login - Secretary (saves token)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"identifier\": \"secretary@gmail.com\", \"password\": \"Secretary Clinic\", \"role\": \"secretary\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('secretaryToken', pm.response.json().token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. List patients (all)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctorToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/patients",
+        "description": "Needs the sample data: run `npm run seed:patients` once. Saves the first patient id for the requests below."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('Returns patients, total, page and limit', () => { pm.expect(j.patients).to.be.an('array'); pm.expect(j).to.have.property('total'); pm.expect(j.page).to.eql(1); });",
+              "pm.test('No-store cache header', () => pm.expect(pm.response.headers.get('Cache-Control')).to.include('no-store'));",
+              "if (j.patients.length) { pm.collectionVariables.set('patientId', String(j.patients[0].id)); pm.collectionVariables.set('patientCode', j.patients[0].patientCode); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Search by name",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctorToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/patients?search=maria"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Every result matches the name', () => pm.response.json().patients.forEach(p => pm.expect(p.fullName.toLowerCase()).to.include('maria')));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Search by patient ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctorToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/patients?search={{patientCode}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Finds the patient with that ID', () => pm.expect(pm.response.json().patients.map(p => p.patientCode)).to.include(pm.collectionVariables.get('patientCode')));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Search - no match",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctorToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/patients?search=zzzz%20no%20such%20patient"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 with an empty list', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().patients).to.have.lengthOf(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Search - invalid characters",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctorToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/patients?search=%3Cscript%3E"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Rejected with 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Invalid page",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctorToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/patients?page=0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Rejected with 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Patient record (by id)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctorToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/patients/{{patientId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('Has personal details', () => { pm.expect(j.patient).to.have.property('fullName'); pm.expect(j.patient).to.have.property('birthDate'); });",
+              "pm.test('Has medical history (object or null)', () => pm.expect(j).to.have.property('medicalHistory'));",
+              "pm.test('Check-ups are newest first', () => { const d = j.checkups.map(c => c.date); pm.expect(d).to.eql([...d].sort().reverse()); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Patient record (by patient code)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctorToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/patients/{{patientCode}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Same patient', () => pm.expect(pm.response.json().patient.patientCode).to.eql(pm.collectionVariables.get('patientCode')));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Patient not found",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctorToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/patients/999999"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('404 with a readable message', () => { pm.response.to.have.status(404); pm.expect(pm.response.json().message).to.eql('Patient record not found.'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Invalid patient ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctorToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/patients/abc"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Rejected with 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. No token",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/patients"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Blocked with 401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Secretary is not allowed",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{secretaryToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/patients"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Forbidden with 403 (doctor only)', () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "doctorToken",
+      "value": ""
+    },
+    {
+      "key": "secretaryToken",
+      "value": ""
+    },
+    {
+      "key": "patientId",
+      "value": "1"
+    },
+    {
+      "key": "patientCode",
+      "value": "P-0001"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 This backend implements **doctor login only** for the existing React/Vite login page. It does not include patient, appointment, consultation, or dashboard APIs.
 
-## Requirements
+## Requirements 
 
 - Node.js (18 or newer recommended)
 - XAMPP with MySQL running

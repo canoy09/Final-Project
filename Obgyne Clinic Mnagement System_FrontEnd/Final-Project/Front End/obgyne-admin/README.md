@@ -1,15 +1,16 @@
-# Obgyne Clinic – Admin (Doctor) Front End
+# React + Vite
 
-Currently built: **Doctor login page** only. Backend is not connected yet.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Run
-```
-npm install
-npm run dev
-```
-With `VITE_MOCK_AUTH=true` (in `.env`) you can sign in with
-`doctor@womenscare.test` / `doctor123`.
+Currently, two official plugins are available:
 
-## Connecting your backend later
-Edit `src/services/auth.js` – expects `POST {VITE_API_URL}/doctor/login`
-returning `{ token, doctor: { id, name, email } }`. Set `VITE_MOCK_AUTH=false`.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.

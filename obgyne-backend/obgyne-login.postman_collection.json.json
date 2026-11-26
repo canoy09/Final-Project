@@ -1,0 +1,75 @@
+{
+  "info": {
+    "name": "Obgyne Login (simple)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:3000/api/health"
+      }
+    },
+    {
+      "name": "Login doctor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:3000/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"identifier\":\"doctor@gmail.com\",\"password\":\"Doctor Clinic\",\"role\":\"doctor\"}"
+        }
+      }
+    },
+    {
+      "name": "Login wrong password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:3000/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"identifier\":\"doctor@gmail.com\",\"password\":\"wrong\",\"role\":\"doctor\"}"
+        }
+      }
+    },
+    {
+      "name": "Login secretary",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:3000/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"identifier\":\"secretary@gmail.com\",\"password\":\"Secretary Clinic\",\"role\":\"secretary\"}"
+        }
+      }
+    },
+    {
+      "name": "Me (no token)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:3000/api/auth/me"
+      }
+    }
+  ]
+}
