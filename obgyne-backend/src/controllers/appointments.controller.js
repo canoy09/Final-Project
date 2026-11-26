@@ -1,17 +1,12 @@
 const pool = require('../config/db')
+const { isValidISODate } = require('../utils/validate')
 
 const VALID_STATUSES = ['pending', 'approved', 'rejected', 'completed']
-
-function isValidDate(value) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
-  const parsed = new Date(`${value}T00:00:00Z`)
-  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value
-}
 
 async function listAppointments(req, res, next) {
   try {
     const { date, status } = req.query
-    if (date !== undefined && (typeof date !== 'string' || !isValidDate(date))) {
+    if (date !== undefined && (typeof date !== 'string' || !isValidISODate(date))) {
       return res.status(400).json({ message: 'Date must be a valid YYYY-MM-DD date.' })
     }
     if (status !== undefined && (typeof status !== 'string' || !VALID_STATUSES.includes(status))) {

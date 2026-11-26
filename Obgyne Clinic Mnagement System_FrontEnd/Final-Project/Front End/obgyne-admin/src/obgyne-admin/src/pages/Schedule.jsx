@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ROLES } from '../services/auth'
+import AppHeader from '../components/AppHeader'
 import {
   fetchAppointments,
   STATUS_LABELS,
@@ -12,17 +12,6 @@ import './Schedule.css'
 
 const FILTERS = ['all', 'pending', 'approved', 'rejected', 'completed']
 
-// "Dr. Moral-Macatangay" -> "MM", "Clinic Secretary" -> "CS"
-function initials(name) {
-  return name
-    .replace(/^(dr|mr|ms|mrs)\.?\s+/i, '')
-    .split(/[\s-]+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join('')
-}
-
 export default function Schedule({ session, onLogout }) {
   const { user, token } = session
   const [today] = useState(() => toISODate(new Date()))
@@ -30,7 +19,6 @@ export default function Schedule({ session, onLogout }) {
   const [status, setStatus] = useState('all')
   const [reload, setReload] = useState(0)
   const [selectedId, setSelectedId] = useState(null)
-  const [loggingOut, setLoggingOut] = useState(false)
   const [result, setResult] = useState({ key: '', appointments: [], sample: false, error: '' })
 
   // Every change of day / filter / retry makes a new request key
@@ -60,43 +48,10 @@ export default function Schedule({ session, onLogout }) {
   const error = loading ? '' : result.error
   const selected = appointments.find((a) => a.id === selectedId) || null
 
-  async function handleLogout() {
-    setLoggingOut(true)
-    await onLogout()
-  }
-
   return (
     <div className="sched">
       <title>Clinic Schedule | Moral-Macatangay OB-GYN Clinic</title>
-      <header className="sched-bar">
-        <div className="bar-brand">
-          <div className="bar-mark" aria-hidden="true">M</div>
-          <div>
-            <strong>Moral-Macatangay OB-GYN Clinic</strong>
-            <span>CALACA, BATANGAS</span>
-          </div>
-        </div>
-
-        <nav className="bar-nav" aria-label="Main">
-          <div className="bar-link active" aria-current="page">Schedule</div>
-        </nav>
-
-        <div className="bar-user">
-          <div className="avatar" aria-hidden="true">{initials(user.name)}</div>
-          <div className="user-info">
-            <strong>{user.name}</strong>
-            <span className="role-chip">{ROLES[user.role]?.label}</span>
-          </div>
-          <button type="button" className="logout" onClick={handleLogout} disabled={loggingOut}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <path d="M16 17l5-5-5-5" />
-              <path d="M21 12H9" />
-            </svg>
-            {loggingOut ? 'Logging out…' : 'Log out'}
-          </button>
-        </div>
-      </header>
+      <AppHeader user={user} onLogout={onLogout} current="schedule" />
 
       <main className="sched-main">
         <h1>Clinic Appointment Schedule</h1>

@@ -8,6 +8,7 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "seed": "node scripts/seed.js",
+    "seed:patients": "node scripts/seed-patients.js",
     "smoke": "node scripts/test-api.js"
   },
   "dependencies": {

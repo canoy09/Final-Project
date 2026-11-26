@@ -5,6 +5,7 @@ const pool = require('./config/db')
 const authRoutes = require('./routes/auth.routes')
 const adminRoutes = require('./routes/admin.routes')
 const appointmentRoutes = require('./routes/appointments.routes')
+const patientRoutes = require('./routes/patients.routes')
 
 if (!process.env.JWT_SECRET) {
   console.error('Missing JWT_SECRET. Copy .env.example to .env and set it.')
@@ -32,6 +33,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }))
 app.use('/api/auth', authRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/appointments', appointmentRoutes)
+app.use('/api/patients', patientRoutes)
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found.' }))
 
