@@ -1,0 +1,17 @@
+:root {
+  --cream: #f0ece4;
+  --ink: #5a3a2e;        /* brown, clinic name */
+  --green: #5d7a68;      /* buttons */
+  --green-dark: #3f5a49; /* headings */
+  --muted: #6f6a63;
+  --line: #e3ddd2;
+  --error: #b3392f;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--sans);
+  color: var(--muted);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; }
+#root { min-height: 100svh; }
